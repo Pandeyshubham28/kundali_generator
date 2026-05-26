@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vedic Kundali & Strategic Predictive Dashboard</title>
+    <!-- Tailwind CSS for high-performance styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM Core Production CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for on-the-fly JSX parsing -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function KundaliApp() {
+            const [formData, setFormData] = React.useState({ dob: '', time: '', place: '' });
+            const [report, setReport] = React.useState(null);
+            const [loading, setLoading] = React.useState(false);
+            const [activeTab, setActiveTab] = React.useState('dos');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                    // Points directly to the Colab proxy / Local Node.js server port
+                    const response = await fetch('http://localhost:5001/api/generate-kundali', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData),
+                    });
+                    const data = await response.json();
+                    setReport(data);
+                } catch (error) {
+                    console.error("System Error communicating with the Vedic Backend Engine:", error);
+                    alert("Backend server connection failed. Please ensure your Google Colab cell is actively running.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div class="max-w-6xl mx-auto px-4 py-10">
+                    {/* App Header */}
+                    <header class="text-center mb-10">
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
+                            Vedic Chart & Behavior Advisory Engine
+                        </h1>
+                        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                            High-precision sidereal calculations mapping deep timeline analysis, diagnostic past reviews, and critical behavioral guardrails.
+                        </p>
+                    </header>
+
+                    {/* Data Intake Module */}
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8 mb-8">
+                        <form onSubmit={handleSubmit} class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Date of Birth</label>
+                                <input type="date" required value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Time of Birth</label>
+                                <input type="time" required value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Place of Birth</label>
+                                <input type="text" required placeholder="City, Country" value={formData.place} onChange={e => setFormData({...formData, place: e.target.value})} class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                            </div>
+                            <button type="submit" disabled={loading} class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-slate-400">
+                                {loading ? 'Computing Ephemeris...' : 'Generate Matrix'}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Report Output Presentation Layer */}
+                    {report && (
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                            
+                            {/* Left Column: Coordinates & Dynamic Chart UI Layout */}
+                            <div class="lg:col-span-5 space-y-6">
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                                    <h2 class="text-xl font-bold text-slate-900 mb-4">Sidereal Chart Structural Placements</h2>
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm border-collapse">
+                                            <thead>
+                                                <tr class="border-b border-slate-100 text-slate-500 font-medium">
+                                                    <th class="pb-3 font-semibold">Body</th>
+                                                    <th class="pb-3 font-semibold">Zodiac Sign (Rashi)</th>
+                                                    <th class="pb-3 font-semibold text-right">Degree</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-50">
+                                                {report.planetaryPositions.map((p, idx) => (
+                                                    <tr key={idx} class="hover:bg-slate-50/50 transition-colors">
+                                                        <td class="py-3 font-medium text-slate-900">{p.planet}</td>
+                                                        <td class="py-3 text-slate-600">{p.sign}</td>
+                                                        <td class="py-3 text-slate-500 text-right font-mono">{p.degree}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                {/* Dynamic Native Vector Kundali House Map */}
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col items-center">
+                                    <h3 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-4 self-start">D-1 Natal Chart Matrix View</h3>
+                                    <div class="w-full max-w-[280px] aspect-square relative border-2 border-slate-800 bg-slate-50">
+                                        {/* Classic North Indian Structural Geometric Grid Lines */}
+                                        <svg viewBox="0 0 100 100" class="w-full h-full stroke-slate-800 stroke-[0.8] fill-none absolute inset-0 z-0">
+                                            <line x1="0" y1="0" x2="100" y2="100" />
+                                            <line x1="100" y1="0" x2="0" y2="100" />
+                                            <polygon points="50,0 100,50 50,100 0,50" />
+                                        </svg>
+                                        
+                                        {/* House 1 / Lagna Focus (Center Top Diamond) */}
+                                        <div class="absolute top-[18%] left-[50%] -translate-x-1/2 text-center z-10">
+                                            <span class="block text-[11px] font-bold text-blue-600">H1 (Asc)</span>
+                                            <span class="block text-[10px] font-semibold text-slate-800">{report.planetaryPositions[0].sign.substring(0,3)}</span>
+                                        </div>
+                                        {/* House 4 (Left Diamond) */}
+                                        <div class="absolute top-[50%] left-[18%] -translate-y-1/2 text-center z-10">
+                                            <span class="block text-[10px] font-medium text-slate-400">H4</span>
+                                            <span class="block text-[10px] font-semibold text-slate-700">Mo</span>
+                                        </div>
+                                        {/* House 7 (Center Bottom Diamond) */}
+                                        <div class="absolute bottom-[18%] left-[50%] -translate-x-1/2 text-center z-10">
+                                            <span class="block text-[10px] font-medium text-slate-400">H7</span>
+                                        </div>
+                                        {/* House 10 (Right Diamond) */}
+                                        <div class="absolute top-[50%] right-[18%] -translate-y-1/2 text-center z-10">
+                                            <span class="block text-[10px] font-medium text-slate-400">H10</span>
+                                            <span class="block text-[10px] font-semibold text-slate-700">Ma</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column: Predictive Engine Tabs & Action Reports */}
+                            <div class="lg:col-span-7 space-y-6">
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                                    
+                                    {/* Past Deep Analysis Summary */}
+                                    <div class="p-6 md:p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+                                        <div class="flex items-center space-x-2 mb-3">
+                                            <span class="bg-blue-500/20 text-blue-400 text-xs uppercase tracking-wider font-semibold px-2.5 py-1 rounded-md border border-blue-500/30">Calibration Phase</span>
+                                            <h3 class="text-sm text-slate-400 font-medium">Historical 24-Month Review</h3>
+                                        </div>
+                                        <p class="text-slate-200 leading-relaxed text-base">{report.advisoryReport.pastAnalysis}</p>
+                                    </div>
+
+                                    {/* Tab Interactive Toggles */}
+                                    <div class="flex border-b border-slate-100 bg-slate-50/50 p-2 gap-2">
+                                        <button onClick={() => setActiveTab('dos')} class={`flex-1 py-3 text-center text-sm font-bold rounded-xl transition-all ${activeTab === 'dos' ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/40' : 'text-slate-500 hover:text-slate-800'}`}>
+                                            Strategic Actions (Do)
+                                        </button>
+                                        <button onClick={() => setActiveTab('donts')} class={`flex-1 py-3 text-center text-sm font-bold rounded-xl transition-all ${activeTab === 'donts' ? 'bg-white text-rose-700 shadow-sm border border-slate-200/40' : 'text-slate-500 hover:text-slate-800'}`}>
+                                            Risk Mitigations (Avoid)
+                                        </button>
+                                    </div>
+
+                                    {/* Action Content Output Container */}
+                                    <div class="p-6 md:p-8 min-h-[250px]">
+                                        <div class="mb-4 flex items-center justify-between">
+                                            <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">Active Phase: {report.advisoryReport.currentPeriod}</span>
+                                        </div>
+                                        
+                                        {activeTab === 'dos' ? (
+                                            <div class="space-y-4">
+                                                {report.advisoryReport.dos.map((item, idx) => (
+                                                    <div key={idx} class="flex items-start bg-emerald-50/60 border border-emerald-100/80 rounded-xl p-4 transition-all">
+                                                        <span class="flex items-center justify-center bg-emerald-500 text-white rounded-full w-5 h-5 text-xs font-extrabold mt-0.5 mr-3 shrink-0">✓</span>
+                                                        <p class="text-emerald-900 text-sm md:text-base leading-relaxed font-medium">{item}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div class="space-y-4">
+                                                {report.advisoryReport.donts.map((item, idx) => (
+                                                    <div key={idx} class="flex items-start bg-rose-50/60 border border-rose-100/80 rounded-xl p-4 transition-all">
+                                                        <span class="flex items-center justify-center bg-rose-500 text-white rounded-full w-5 h-5 text-xs font-extrabold mt-0.5 mr-3 shrink-0">!</span>
+                                                        <p class="text-rose-900 text-sm md:text-base leading-relaxed font-medium">{item}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<KundaliApp />);
+    </script>
+</body>
+</html>
